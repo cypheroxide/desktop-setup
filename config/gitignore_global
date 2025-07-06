@@ -1,0 +1,240 @@
+# Global gitignore file
+# Place this at ~/.gitignore_global
+
+# Operating System Files
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Editor and IDE Files
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Vim
+*.swp
+*.swo
+*~
+tags
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Nano
+*.save
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Temporary Files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.log
+*.pid
+
+# Archive Files
+*.zip
+*.tar.gz
+*.tar.bz2
+*.rar
+*.7z
+
+# Dependencies and Package Managers
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+
+# C/C++
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# Rust
+target/
+Cargo.lock
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+vendor/
+
+# Ruby
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/spec/reports/
+/spec/examples.txt
+/test/tmp/
+/test/version_tmp/
+/tmp/
+.bundle/
+vendor/bundle
+
+# PHP
+/vendor/
+composer.phar
+composer.lock
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# SSH Keys
+*.pem
+*.key
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+
+# Configuration files with sensitive data
+config.json
+settings.json
+secrets.json
+*.secret
+*.private
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Cache directories
+.cache/
+.npm/
+.yarn/
+.sass-cache/
+
+# Build artifacts
+build/
+dist/
+out/
+target/
+bin/
+obj/
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+.gitmodules
+
+# Docker
+.dockerignore
+Dockerfile.*
+docker-compose.override.yml
+
+# Kubernetes
+*.kubeconfig
+
+# Tailscale
+tailscale.state
+
+# KDE
+.directory
+*~
+
+# Flatpak
+.flatpak-builder/
+
+# Personal notes and documentation
+TODO.md
+NOTES.md
+README.local.md

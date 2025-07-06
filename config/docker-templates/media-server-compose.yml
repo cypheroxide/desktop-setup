@@ -1,0 +1,174 @@
+# Media Server Docker Compose Template
+# Includes Plex, Jellyfin, and supporting services
+# Configured for Tailscale network access
+
+version: '3.8'
+
+services:
+  # Plex Media Server
+  plex:
+    image: plexinc/pms-docker:latest
+    container_name: plex
+    restart: unless-stopped
+    environment:
+      - PLEX_CLAIM=claim-xxxxxxxxxxxxxxxxxxxx  # Get from https://plex.tv/claim
+      - PLEX_UID=1000
+      - PLEX_GID=1000
+      - TZ=America/New_York  # Change to your timezone
+    volumes:
+      - ./plex/config:/config
+      - ./plex/transcode:/transcode
+      - /path/to/media:/data:ro  # Change to your media path
+    ports:
+      - "32400:32400"  # Plex Web UI
+      - "1900:1900/udp"  # DLNA
+      - "3005:3005"  # Plex Companion
+      - "5353:5353/udp"  # Bonjour/Avahi
+      - "8324:8324"  # Roku companion
+      - "32410:32410/udp"  # GDM network discovery
+      - "32412:32412/udp"  # GDM network discovery
+      - "32413:32413/udp"  # GDM network discovery
+      - "32414:32414/udp"  # GDM network discovery
+      - "32469:32469"  # Plex DLNA Server
+    networks:
+      - media-network
+
+  # Jellyfin Media Server (Alternative to Plex)
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    environment:
+      - JELLYFIN_PublishedServerUrl=http://jellyfin.yourtailscale.ts.net:8096
+    volumes:
+      - ./jellyfin/config:/config
+      - ./jellyfin/cache:/cache
+      - /path/to/media:/media:ro  # Change to your media path
+    ports:
+      - "8096:8096"  # Jellyfin Web UI
+      - "8920:8920"  # Jellyfin HTTPS (optional)
+      - "7359:7359/udp"  # Auto-discovery
+      - "1900:1900/udp"  # DLNA
+    networks:
+      - media-network
+
+  # Sonarr - TV Show Management
+  sonarr:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ./sonarr/config:/config
+      - /path/to/tv:/tv
+      - /path/to/downloads:/downloads
+    ports:
+      - "8989:8989"
+    networks:
+      - media-network
+
+  # Radarr - Movie Management
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ./radarr/config:/config
+      - /path/to/movies:/movies
+      - /path/to/downloads:/downloads
+    ports:
+      - "7878:7878"
+    networks:
+      - media-network
+
+  # Prowlarr - Indexer Manager
+  prowlarr:
+    image: linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ./prowlarr/config:/config
+    ports:
+      - "9696:9696"
+    networks:
+      - media-network
+
+  # qBittorrent - Torrent Client
+  qbittorrent:
+    image: linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - WEBUI_PORT=8080
+    volumes:
+      - ./qbittorrent/config:/config
+      - /path/to/downloads:/downloads
+    ports:
+      - "8080:8080"  # Web UI
+      - "6881:6881"  # Torrent port
+      - "6881:6881/udp"
+    networks:
+      - media-network
+
+  # Overseerr - Request Management
+  overseerr:
+    image: sctx/overseerr:latest
+    container_name: overseerr
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=America/New_York
+    volumes:
+      - ./overseerr/config:/app/config
+    ports:
+      - "5055:5055"
+    networks:
+      - media-network
+
+  # Tautulli - Plex Statistics
+  tautulli:
+    image: linuxserver/tautulli:latest
+    container_name: tautulli
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - ./tautulli/config:/config
+    ports:
+      - "8181:8181"
+    networks:
+      - media-network
+
+networks:
+  media-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Volume definitions for persistence
+volumes:
+  plex_config:
+  jellyfin_config:
+  sonarr_config:
+  radarr_config:
+  prowlarr_config:
+  qbittorrent_config:
+  overseerr_config:
+  tautulli_config:

@@ -1,0 +1,137 @@
+# SSH Client Configuration
+# Place this at ~/.ssh/config
+
+# Global settings
+Host *
+    # Security settings
+    PasswordAuthentication no
+    PubkeyAuthentication yes
+    ChallengeResponseAuthentication no
+    
+    # Connection settings
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    ConnectTimeout 10
+    
+    # Performance settings
+    Compression yes
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
+    
+    # Key management
+    AddKeysToAgent yes
+    IdentitiesOnly yes
+    
+    # Disable host key checking for local Tailscale network
+    # (Remove this if you prefer strict host key checking)
+    # StrictHostKeyChecking no
+    # UserKnownHostsFile /dev/null
+
+# Tailscale network hosts
+Host aurumos aurumos.tail*
+    HostName aurumos
+    User cypheroxide
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519
+    ForwardAgent yes
+
+Host eresos eresos.tail*
+    HostName eresos
+    User cypheroxide
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519
+    ForwardAgent yes
+
+Host saeulfr saeulfr.tail*
+    HostName saeulfr
+    User cypheroxide
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519
+    ForwardAgent yes
+
+Host pi4-router pi4-router.tail*
+    HostName pi4-router
+    User pi
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519
+    ForwardAgent yes
+
+Host brokkr brokkr.tail*
+    HostName brokkr
+    User cypheroxide
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519
+    ForwardAgent yes
+
+# GitHub
+Host github.com
+    HostName github.com
+    User git
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519_github
+    AddKeysToAgent yes
+
+# GitLab
+Host gitlab.com
+    HostName gitlab.com
+    User git
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519_gitlab
+    AddKeysToAgent yes
+
+# Example VPS/Cloud server
+Host vps
+    HostName your-server.example.com
+    User username
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519_vps
+    ForwardAgent no
+
+# Example with port forwarding for development
+Host dev-server
+    HostName your-dev-server.example.com
+    User developer
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519
+    LocalForward 3000 localhost:3000
+    LocalForward 5432 localhost:5432
+    LocalForward 6379 localhost:6379
+
+# Example with jump host
+Host internal-server
+    HostName 192.168.1.100
+    User admin
+    Port 22
+    ProxyJump jump-host
+    IdentityFile ~/.ssh/id_ed25519
+
+Host jump-host
+    HostName jump.example.com
+    User jumpuser
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519_jump
+
+# Example for containers/Docker
+Host docker-container
+    HostName localhost
+    User root
+    Port 2222
+    IdentityFile ~/.ssh/id_ed25519
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+# Local development VM
+Host vagrant
+    HostName 127.0.0.1
+    User vagrant
+    Port 2222
+    UserKnownHostsFile /dev/null
+    StrictHostKeyChecking no
+    PasswordAuthentication no
+    IdentityFile ~/.vagrant.d/insecure_private_key
+    IdentitiesOnly yes
+    LogLevel FATAL
+
+# Create socket directory if it doesn't exist
+# Run: mkdir -p ~/.ssh/sockets

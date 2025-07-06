@@ -1,0 +1,32 @@
+# Konsole Configuration
+# Place this at ~/.config/konsolerc
+
+[Desktop Entry]
+DefaultProfile=Development.profile
+
+[Favorite Profiles]
+Favorites=
+
+[FileLocation]
+scrollbackUseCacheLocation=false
+
+[General]
+ConfigVersion=1
+
+[KonsoleWindow]
+RememberWindowSize=false
+ShowMenuBarByDefault=true
+
+[MainWindow]
+MenuBar=Disabled
+State=AAAA/wAAAAD9AAAAAAAABTQAAAOyAAAABAAAAAQAAAAIAAAACPwAAAAA
+ToolBarsMovable=Disabled
+
+[TabBar]
+CloseTabOnMiddleMouseButton=true
+ExpandTabWidth=false
+NewTabBehavior=PutNewTabAfterCurrentTab
+TabBarPosition=Top
+
+[UiSettings]
+ColorScheme=
