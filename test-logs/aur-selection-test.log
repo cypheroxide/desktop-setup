@@ -1,0 +1,27 @@
+[0;34m[2025-07-06 15:50:48][0m Testing AUR helper selection functionality...
+[1;33mChoose AUR helper:[0m
+1. yay (default, feature-rich AUR helper)
+2. paru (rust-based AUR helper)
+
+[?25l[?2004hChoose AUR helper:          
+> yay                       
+  paru                      
+                            
+                            
+←↓↑→ navigate • enter submit[D[5A
+  yay                       
+> paru                      
+
+
+[D[5A
+> yay                       
+  paru                      
+
+
+[D[5A [J[D[2K[?2004l[?25h[?1002l[?1003l[?1006l[0;34m[2025-07-06 15:52:31][0m Selected AUR helper: yay
+[0;32m[2025-07-06 15:52:31] SUCCESS:[0m AUR_HELPER variable is set to: yay
+[0;34m[2025-07-06 15:52:31][0m Testing command construction...
+[0;34m[2025-07-06 15:52:31][0m Test command: yay -S --needed package-name
+[0;32m[2025-07-06 15:52:31] SUCCESS:[0m yay is installed and available
+yay v12.5.0 - libalpm v15.0.0
+[0;32m[2025-07-06 15:52:32] SUCCESS:[0m Test completed successfully!

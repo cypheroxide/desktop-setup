@@ -42,9 +42,53 @@ error_trap() {
 # Set up error trap
 trap 'error_trap $LINENO' ERR
 
+# Function to prompt for AUR helper selection
+select_aur_helper() {
+    echo -e "${YELLOW}Choose AUR helper:${NC}"
+    echo "1. yay (default, feature-rich AUR helper)"
+    echo "2. paru (rust-based AUR helper)"
+    echo ""
+    
+    if command -v gum > /dev/null 2>&1; then
+        # Use gum for better interface
+        local choice
+        choice=$(gum choose "yay" "paru" --header "Choose AUR helper:" --selected "yay")
+        AUR_HELPER="$choice"
+    else
+        # Fallback to read prompt
+        local choice
+        read -p "Enter your choice (1 for yay, 2 for paru) [1]: " choice
+        
+        case "$choice" in
+            1|"")
+                AUR_HELPER="yay"
+                ;;
+            2)
+                AUR_HELPER="paru"
+                ;;
+            yay)
+                AUR_HELPER="yay"
+                ;;
+            paru)
+                AUR_HELPER="paru"
+                ;;
+            *)
+                log_warning "Invalid choice '$choice'. Defaulting to yay."
+                AUR_HELPER="yay"
+                ;;
+        esac
+    fi
+    
+    log "Selected AUR helper: $AUR_HELPER"
+    export AUR_HELPER
+}
+
 # Main installation function
 main() {
     log "Starting installation process..."
+    
+    # Select AUR helper
+    select_aur_helper
     
     # Check if install directory exists
     if [ ! -d "install" ]; then

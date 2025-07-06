@@ -1,0 +1,170 @@
+name: Update Status Badges
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types: [completed]
+  push:
+    branches: [main, master]
+    paths: ['README.md']
+
+jobs:
+  update-badges:
+    name: Update Status Badges
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+    
+    - name: Get workflow run status
+      id: workflow-status
+      run: |
+        # Get the latest workflow run status
+        REPO_OWNER="${{ github.repository_owner }}"
+        REPO_NAME="${{ github.event.repository.name }}"
+        
+        # Get workflow status from API
+        WORKFLOW_STATUS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/workflows/ci.yml/runs?per_page=1" | \
+          jq -r '.workflow_runs[0].conclusion // "unknown"')
+        
+        echo "workflow_status=$WORKFLOW_STATUS" >> $GITHUB_OUTPUT
+        
+        # Get branch name
+        BRANCH_NAME=${GITHUB_REF#refs/heads/}
+        echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+        
+        # Get repository info
+        echo "repo_owner=$REPO_OWNER" >> $GITHUB_OUTPUT
+        echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
+    
+    - name: Generate badge URLs
+      id: badges
+      run: |
+        REPO_OWNER="${{ steps.workflow-status.outputs.repo_owner }}"
+        REPO_NAME="${{ steps.workflow-status.outputs.repo_name }}"
+        BRANCH_NAME="${{ steps.workflow-status.outputs.branch_name }}"
+        
+        # CI/CD Pipeline badge
+        CI_BADGE="[![CI/CD Pipeline](https://github.com/${REPO_OWNER}/${REPO_NAME}/workflows/CI%2FCD%20Pipeline/badge.svg?branch=${BRANCH_NAME})](https://github.com/${REPO_OWNER}/${REPO_NAME}/actions/workflows/ci.yml)"
+        
+        # ShellCheck badge
+        SHELLCHECK_BADGE="[![ShellCheck](https://github.com/${REPO_OWNER}/${REPO_NAME}/workflows/CI%2FCD%20Pipeline/badge.svg?branch=${BRANCH_NAME}&event=push)](https://github.com/${REPO_OWNER}/${REPO_NAME}/actions/workflows/ci.yml)"
+        
+        # License badge (assuming MIT, adjust as needed)
+        LICENSE_BADGE="[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)"
+        
+        # Arch Linux badge
+        ARCH_BADGE="[![Arch Linux](https://img.shields.io/badge/Arch%20Linux-1793D1?logo=arch-linux&logoColor=fff)](https://archlinux.org/)"
+        
+        # Shell badge
+        SHELL_BADGE="[![Shell Script](https://img.shields.io/badge/Shell_Script-121011?logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)"
+        
+        # Docker badge
+        DOCKER_BADGE="[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)"
+        
+        # KDE badge
+        KDE_BADGE="[![KDE](https://img.shields.io/badge/KDE-1d99f3?logo=kde&logoColor=white)](https://kde.org/)"
+        
+        # Tailscale badge
+        TAILSCALE_BADGE="[![Tailscale](https://img.shields.io/badge/Tailscale-000000?logo=tailscale&logoColor=white)](https://tailscale.com/)"
+        
+        # Save badges to output
+        echo "ci_badge=$CI_BADGE" >> $GITHUB_OUTPUT
+        echo "shellcheck_badge=$SHELLCHECK_BADGE" >> $GITHUB_OUTPUT
+        echo "license_badge=$LICENSE_BADGE" >> $GITHUB_OUTPUT
+        echo "arch_badge=$ARCH_BADGE" >> $GITHUB_OUTPUT
+        echo "shell_badge=$SHELL_BADGE" >> $GITHUB_OUTPUT
+        echo "docker_badge=$DOCKER_BADGE" >> $GITHUB_OUTPUT
+        echo "kde_badge=$KDE_BADGE" >> $GITHUB_OUTPUT
+        echo "tailscale_badge=$TAILSCALE_BADGE" >> $GITHUB_OUTPUT
+    
+    - name: Update README with badges
+      run: |
+        # Check if README.md exists
+        if [ ! -f README.md ]; then
+          echo "README.md not found, skipping badge update"
+          exit 0
+        fi
+        
+        # Create badges section
+        cat > badges_section.md << 'EOF'
+        ## Status Badges
+        
+        ${{ steps.badges.outputs.ci_badge }}
+        ${{ steps.badges.outputs.shellcheck_badge }}
+        ${{ steps.badges.outputs.license_badge }}
+        
+        ## Technology Stack
+        
+        ${{ steps.badges.outputs.arch_badge }}
+        ${{ steps.badges.outputs.shell_badge }}
+        ${{ steps.badges.outputs.docker_badge }}
+        ${{ steps.badges.outputs.kde_badge }}
+        ${{ steps.badges.outputs.tailscale_badge }}
+        
+        EOF
+        
+        # Check if badges section already exists
+        if grep -q "## Status Badges" README.md; then
+          echo "Badges section already exists, updating..."
+          # Remove existing badges section and add new one
+          sed -i '/## Status Badges/,/^## [^S]/{ /^## [^S]/!d; }' README.md
+          sed -i '/## Status Badges/d' README.md
+        fi
+        
+        # Add badges section after the main title
+        if grep -q "# Desktop Setup" README.md; then
+          # Insert after the main title
+          sed -i '/# Desktop Setup/r badges_section.md' README.md
+        else
+          # Prepend to the file
+          cat badges_section.md README.md > README_temp.md
+          mv README_temp.md README.md
+        fi
+        
+        # Clean up
+        rm -f badges_section.md
+    
+    - name: Generate project statistics
+      run: |
+        echo "## Project Statistics" > stats.md
+        echo "" >> stats.md
+        echo "![GitHub repo size](https://img.shields.io/github/repo-size/${{ steps.workflow-status.outputs.repo_owner }}/${{ steps.workflow-status.outputs.repo_name }})" >> stats.md
+        echo "![Lines of code](https://img.shields.io/tokei/lines/github/${{ steps.workflow-status.outputs.repo_owner }}/${{ steps.workflow-status.outputs.repo_name }})" >> stats.md
+        echo "![GitHub last commit](https://img.shields.io/github/last-commit/${{ steps.workflow-status.outputs.repo_owner }}/${{ steps.workflow-status.outputs.repo_name }})" >> stats.md
+        echo "" >> stats.md
+        echo "- **Total shell scripts**: $(find . -name '*.sh' -type f | wc -l)" >> stats.md
+        echo "- **Install modules**: $(find install -name '*.sh' -type f 2>/dev/null | wc -l)" >> stats.md
+        echo "- **Utility scripts**: $(find bin -name '*.sh' -type f 2>/dev/null | wc -l)" >> stats.md
+        echo "- **Configuration files**: $(find config -type f 2>/dev/null | wc -l)" >> stats.md
+        echo "" >> stats.md
+        
+        # Add statistics to README if it doesn't exist
+        if ! grep -q "## Project Statistics" README.md; then
+          echo "" >> README.md
+          cat stats.md >> README.md
+        fi
+        
+        rm -f stats.md
+    
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Check if there are changes
+        if git diff --quiet; then
+          echo "No changes to commit"
+          exit 0
+        fi
+        
+        git add README.md
+        git commit -m "Update status badges and project statistics [skip ci]"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

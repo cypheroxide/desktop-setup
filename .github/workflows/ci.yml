@@ -1,0 +1,374 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+env:
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  shellcheck:
+    name: Shell Script Linting
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install ShellCheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y shellcheck
+        
+    - name: Find shell scripts
+      id: find-scripts
+      run: |
+        # Find all shell scripts in the repository
+        find . -name "*.sh" -type f | tee shell_scripts.txt
+        echo "Found $(wc -l < shell_scripts.txt) shell scripts"
+        
+    - name: Run ShellCheck
+      run: |
+        # Run shellcheck on all shell scripts
+        exit_code=0
+        while IFS= read -r script; do
+          echo "Checking $script..."
+          if ! shellcheck -x -e SC1091 "$script"; then
+            echo "❌ ShellCheck failed for $script"
+            exit_code=1
+          else
+            echo "✅ ShellCheck passed for $script"
+          fi
+        done < shell_scripts.txt
+        
+        if [ $exit_code -eq 0 ]; then
+          echo "🎉 All shell scripts passed ShellCheck!"
+        else
+          echo "💥 Some shell scripts failed ShellCheck"
+        fi
+        exit $exit_code
+        
+    - name: Upload ShellCheck results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: shellcheck-results
+        path: shell_scripts.txt
+
+  config-validation:
+    name: Configuration Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Validate project structure
+      run: |
+        echo "Validating project structure..."
+        
+        # Check for required directories
+        required_dirs=("bin" "config" "install")
+        for dir in "${required_dirs[@]}"; do
+          if [ ! -d "$dir" ]; then
+            echo "❌ Missing required directory: $dir"
+            exit 1
+          else
+            echo "✅ Found directory: $dir"
+          fi
+        done
+        
+        # Check for main scripts
+        required_scripts=("bootstrap.sh" "install.sh")
+        for script in "${required_scripts[@]}"; do
+          if [ ! -f "$script" ]; then
+            echo "❌ Missing required script: $script"
+            exit 1
+          else
+            echo "✅ Found script: $script"
+          fi
+        done
+        
+    - name: Validate configuration files
+      run: |
+        echo "Validating configuration files..."
+        
+        # Check config directory structure
+        if [ ! -d "config" ]; then
+          echo "❌ Config directory not found"
+          exit 1
+        fi
+        
+        # Validate specific config files exist
+        config_files=("bashrc" "zshrc" "gitconfig")
+        for config in "${config_files[@]}"; do
+          if [ ! -f "config/$config" ]; then
+            echo "⚠️  Config file not found: config/$config"
+          else
+            echo "✅ Found config file: config/$config"
+          fi
+        done
+        
+        # Validate install scripts are executable
+        for script in install/*.sh; do
+          if [ ! -x "$script" ]; then
+            echo "❌ Install script not executable: $script"
+            exit 1
+          else
+            echo "✅ Install script is executable: $script"
+          fi
+        done
+        
+    - name: Validate Docker templates
+      run: |
+        echo "Validating Docker templates..."
+        
+        if [ -d "config/docker-templates" ]; then
+          for template in config/docker-templates/*.yml config/docker-templates/*.yaml; do
+            if [ -f "$template" ]; then
+              echo "Validating $template..."
+              # Basic YAML syntax check
+              python3 -c "
+import yaml
+import sys
+try:
+    with open('$template', 'r') as f:
+        yaml.safe_load(f)
+    print('✅ Valid YAML: $template')
+except Exception as e:
+    print('❌ Invalid YAML: $template - ' + str(e))
+    sys.exit(1)
+"
+            fi
+          done
+        else
+          echo "⚠️  No Docker templates directory found"
+        fi
+
+  test-non-interactive:
+    name: Non-Interactive Installation Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-scenario:
+          - dry-run
+          - container-validation
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Create test Dockerfile
+      run: |
+        cat > Dockerfile.test << 'EOF'
+        FROM archlinux:latest
+        
+        # Install basic dependencies
+        RUN pacman -Syu --noconfirm && \
+            pacman -S --noconfirm git base-devel sudo && \
+            pacman -Scc --noconfirm
+        
+        # Create test user
+        RUN useradd -m -G wheel testuser && \
+            echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+        
+        # Copy project files
+        COPY . /home/testuser/desktop-setup
+        RUN chown -R testuser:testuser /home/testuser/desktop-setup
+        
+        USER testuser
+        WORKDIR /home/testuser/desktop-setup
+        
+        # Make scripts executable
+        RUN chmod +x *.sh bin/*.sh install/*.sh
+        
+        EOF
+        
+    - name: Test dry-run installation
+      if: matrix.test-scenario == 'dry-run'
+      run: |
+        echo "Building test container..."
+        docker build -f Dockerfile.test -t desktop-setup-test .
+        
+        echo "Running dry-run test..."
+        docker run --rm desktop-setup-test bash -c "
+          echo 'Testing dry-run installation...'
+          if [ -f install.sh ]; then
+            ./install.sh --dry-run || true
+          else
+            echo '❌ install.sh not found'
+            exit 1
+          fi
+          
+          echo 'Testing bootstrap dry-run...'
+          if [ -f bootstrap.sh ]; then
+            # Set non-interactive mode
+            export DEBIAN_FRONTEND=noninteractive
+            export BOOTSTRAP_NON_INTERACTIVE=1
+            ./bootstrap.sh --help || true
+          else
+            echo '❌ bootstrap.sh not found'
+            exit 1
+          fi
+        "
+        
+    - name: Test container validation
+      if: matrix.test-scenario == 'container-validation'
+      run: |
+        echo "Testing container environment validation..."
+        docker build -f Dockerfile.test -t desktop-setup-test .
+        
+        docker run --rm desktop-setup-test bash -c "
+          echo 'Validating project structure in container...'
+          
+          # Check if scripts are executable
+          for script in *.sh bin/*.sh install/*.sh; do
+            if [ -f \"\$script\" ] && [ ! -x \"\$script\" ]; then
+              echo '❌ Script not executable: \$script'
+              exit 1
+            fi
+          done
+          
+          # Test basic script syntax
+          for script in *.sh bin/*.sh install/*.sh; do
+            if [ -f \"\$script\" ]; then
+              echo 'Checking syntax: \$script'
+              bash -n \"\$script\" || {
+                echo '❌ Syntax error in \$script'
+                exit 1
+              }
+            fi
+          done
+          
+          echo '✅ All validation checks passed in container'
+        "
+
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [shellcheck, config-validation]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Test script dependencies
+      run: |
+        echo "Testing script dependencies..."
+        
+        # Check if scripts handle missing dependencies gracefully
+        for script in install/*.sh; do
+          if [ -f "$script" ]; then
+            echo "Testing dependency handling in $script..."
+            # Check if script has proper error handling
+            if grep -q "set -e" "$script"; then
+              echo "✅ $script has error handling"
+            else
+              echo "⚠️  $script missing 'set -e' error handling"
+            fi
+          fi
+        done
+        
+    - name: Test utility scripts
+      run: |
+        echo "Testing utility scripts..."
+        
+        for script in bin/*.sh; do
+          if [ -f "$script" ]; then
+            echo "Testing $script..."
+            # Test help functionality
+            if bash "$script" --help 2>/dev/null || bash "$script" -h 2>/dev/null; then
+              echo "✅ $script has help functionality"
+            else
+              echo "⚠️  $script may not have help functionality"
+            fi
+          fi
+        done
+
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Scan for hardcoded secrets
+      run: |
+        echo "Scanning for potential hardcoded secrets..."
+        
+        # Look for potential secrets in scripts
+        if grep -r -i -E "(password|token|key|secret)" --include="*.sh" .; then
+          echo "⚠️  Found potential secrets - please review"
+        else
+          echo "✅ No obvious hardcoded secrets found"
+        fi
+        
+    - name: Check for unsafe practices
+      run: |
+        echo "Checking for unsafe shell practices..."
+        
+        # Check for unsafe practices
+        unsafe_patterns=0
+        
+        # Check for unquoted variables
+        if grep -r -E '\$[A-Za-z_][A-Za-z0-9_]*[^"]' --include="*.sh" . | grep -v "set -e"; then
+          echo "⚠️  Found potentially unquoted variables"
+          unsafe_patterns=$((unsafe_patterns + 1))
+        fi
+        
+        # Check for eval usage
+        if grep -r "eval" --include="*.sh" .; then
+          echo "⚠️  Found eval usage - review for security"
+          unsafe_patterns=$((unsafe_patterns + 1))
+        fi
+        
+        if [ $unsafe_patterns -eq 0 ]; then
+          echo "✅ No obvious unsafe practices found"
+        fi
+
+  generate-report:
+    name: Generate Test Report
+    runs-on: ubuntu-latest
+    needs: [shellcheck, config-validation, test-non-interactive, integration-test, security-scan]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Generate test report
+      run: |
+        echo "# CI/CD Test Report" > test-report.md
+        echo "" >> test-report.md
+        echo "Generated on: $(date)" >> test-report.md
+        echo "" >> test-report.md
+        
+        # Add job status
+        echo "## Job Status" >> test-report.md
+        echo "- ShellCheck: ${{ needs.shellcheck.result }}" >> test-report.md
+        echo "- Config Validation: ${{ needs.config-validation.result }}" >> test-report.md
+        echo "- Non-Interactive Test: ${{ needs.test-non-interactive.result }}" >> test-report.md
+        echo "- Integration Test: ${{ needs.integration-test.result }}" >> test-report.md
+        echo "- Security Scan: ${{ needs.security-scan.result }}" >> test-report.md
+        
+        echo "" >> test-report.md
+        echo "## Repository Statistics" >> test-report.md
+        echo "- Total shell scripts: $(find . -name '*.sh' -type f | wc -l)" >> test-report.md
+        echo "- Install modules: $(find install -name '*.sh' -type f | wc -l)" >> test-report.md
+        echo "- Utility scripts: $(find bin -name '*.sh' -type f | wc -l)" >> test-report.md
+        
+    - name: Upload test report
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-report
+        path: test-report.md

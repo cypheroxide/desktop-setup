@@ -1,0 +1,103 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "source": "arch",
+        "padding": {
+            "top": 1,
+            "left": 2
+        }
+    },
+    "display": {
+        "separator": " -> ",
+        "color": {
+            "keys": "blue",
+            "title": "blue"
+        }
+    },
+    "modules": [
+        {
+            "type": "title",
+            "color": {
+                "user": "blue",
+                "at": "white",
+                "host": "green"
+            }
+        },
+        "separator",
+        {
+            "type": "os",
+            "key": "🖥️ OS"
+        },
+        {
+            "type": "kernel",
+            "key": "│ ├ 🐧 Kernel"
+        },
+        {
+            "type": "packages",
+            "key": "│ ├ 📦 Packages"
+        },
+        {
+            "type": "shell",
+            "key": "│ └ 🐚 Shell"
+        },
+        "break",
+        {
+            "type": "wm",
+            "key": "🎨 DE/WM"
+        },
+        {
+            "type": "theme",
+            "key": "│ ├ 🎭 Theme"
+        },
+        {
+            "type": "icons",
+            "key": "│ ├ 🎯 Icons"
+        },
+        {
+            "type": "terminal",
+            "key": "│ └ 💻 Terminal"
+        },
+        "break",
+        {
+            "type": "host",
+            "key": "🏠 PC"
+        },
+        {
+            "type": "cpu",
+            "key": "│ ├ ⚡ CPU"
+        },
+        {
+            "type": "gpu",
+            "key": "│ ├ 🎮 GPU"
+        },
+        {
+            "type": "memory",
+            "key": "│ ├ 🧠 Memory"
+        },
+        {
+            "type": "uptime",
+            "key": "│ ├ ⏱️ Uptime"
+        },
+        {
+            "type": "display",
+            "key": "│ └ 📺 Resolution"
+        },
+        "break",
+        {
+            "type": "disk",
+            "key": "💾 Disk (/)",
+            "folders": "/"
+        },
+        {
+            "type": "disk",
+            "key": "💾 Disk (Data)",
+            "folders": "/run/media/$USER/Data"
+        },
+        "separator",
+        {
+            "type": "colors",
+            "paddingLeft": 2,
+            "symbol": "circle"
+        }
+    ]
+}

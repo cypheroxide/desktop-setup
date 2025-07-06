@@ -71,8 +71,8 @@ log "Starting developer utilities installation..."
 if ! command -v gum &> /dev/null; then
     if confirm "Install gum for better interactive prompts?"; then
         log "Installing gum..."
-        if command -v yay &> /dev/null; then
-            yay -S --noconfirm --needed gum
+        if command -v "${AUR_HELPER:-yay}" &> /dev/null; then
+            ${AUR_HELPER:-yay} -S --noconfirm --needed gum
         else
             sudo pacman -S --noconfirm --needed gum
         fi
@@ -159,9 +159,9 @@ if confirm "Install advanced Git tools? (lazygit, git-delta, etc.)"; then
         git-delta \
         difftastic
     
-    # Install from AUR if yay is available
-    if command -v yay &> /dev/null; then
-        yay -S --noconfirm --needed \
+    # Install from AUR if AUR helper is available
+    if command -v "${AUR_HELPER:-yay}" &> /dev/null; then
+        ${AUR_HELPER:-yay} -S --noconfirm --needed \
             lazygit \
             gh \
             hub \
@@ -171,7 +171,7 @@ if confirm "Install advanced Git tools? (lazygit, git-delta, etc.)"; then
             git-cliff \
             git-trim
     else
-        warn "yay not available, skipping AUR Git tools"
+        warn "${AUR_HELPER:-yay} not available, skipping AUR Git tools"
     fi
     
     success "Git tools installed"
@@ -205,9 +205,9 @@ if confirm "Install language servers and development tools?"; then
         mermaid-cli \
         plantuml
     
-    # Install from AUR if yay is available
-    if command -v yay &> /dev/null; then
-        yay -S --noconfirm --needed \
+    # Install from AUR if AUR helper is available
+    if command -v "${AUR_HELPER:-yay}" &> /dev/null; then
+        ${AUR_HELPER:-yay} -S --noconfirm --needed \
             lua-language-server \
             bash-language-server \
             dockerfile-language-server \
@@ -217,7 +217,7 @@ if confirm "Install language servers and development tools?"; then
             hadolint-bin \
             shellharden
     else
-        warn "yay not available, skipping AUR language servers"
+        warn "${AUR_HELPER:-yay} not available, skipping AUR language servers"
     fi
     
     success "Language servers and development tools installed"
@@ -357,8 +357,8 @@ if confirm "Install and setup pyenv (Python Version Manager)?"; then
         sqlite
     
     # Install pyenv
-    if command -v yay &> /dev/null; then
-        yay -S --noconfirm --needed pyenv
+    if command -v "${AUR_HELPER:-yay}" &> /dev/null; then
+        ${AUR_HELPER:-yay} -S --noconfirm --needed pyenv
     else
         # Install pyenv manually
         git clone https://github.com/pyenv/pyenv.git ~/.pyenv
@@ -457,15 +457,15 @@ if confirm "Install database development tools?"; then
         pgadmin4 \
         sqlitebrowser
     
-    # Install from AUR if yay is available
-    if command -v yay &> /dev/null; then
-        yay -S --noconfirm --needed \
+    # Install from AUR if AUR helper is available
+    if command -v "${AUR_HELPER:-yay}" &> /dev/null; then
+        ${AUR_HELPER:-yay} -S --noconfirm --needed \
             dbeaver \
             mongodb-compass \
             redis-desktop-manager \
             robo3t-bin
     else
-        warn "yay not available, skipping AUR database tools"
+        warn "${AUR_HELPER:-yay} not available, skipping AUR database tools"
     fi
     
     success "Database tools installed"
@@ -493,9 +493,9 @@ if confirm "Install container and DevOps tools?"; then
         nomad \
         vault
     
-    # Install from AUR if yay is available
-    if command -v yay &> /dev/null; then
-        yay -S --noconfirm --needed \
+    # Install from AUR if AUR helper is available
+    if command -v "${AUR_HELPER:-yay}" &> /dev/null; then
+        ${AUR_HELPER:-yay} -S --noconfirm --needed \
             docker-desktop \
             minikube \
             kind-bin \
@@ -511,7 +511,7 @@ if confirm "Install container and DevOps tools?"; then
             grype-bin \
             syft-bin
     else
-        warn "yay not available, skipping AUR DevOps tools"
+        warn "${AUR_HELPER:-yay} not available, skipping AUR DevOps tools"
     fi
     
     success "Container and DevOps tools installed"
@@ -543,9 +543,9 @@ if confirm "Install text processing and documentation tools?"; then
         proselint \
         write-good
     
-    # Install from AUR if yay is available
-    if command -v yay &> /dev/null; then
-        yay -S --noconfirm --needed \
+    # Install from AUR if AUR helper is available
+    if command -v "${AUR_HELPER:-yay}" &> /dev/null; then
+        ${AUR_HELPER:-yay} -S --noconfirm --needed \
             obsidian \
             typora \
             marktext \
@@ -555,7 +555,7 @@ if confirm "Install text processing and documentation tools?"; then
             drawio-desktop-bin \
             marp-cli
     else
-        warn "yay not available, skipping AUR documentation tools"
+        warn "${AUR_HELPER:-yay} not available, skipping AUR documentation tools"
     fi
     
     success "Text processing and documentation tools installed"
@@ -591,9 +591,9 @@ if confirm "Install monitoring and system tools?"; then
         screen \
         byobu
     
-    # Install from AUR if yay is available
-    if command -v yay &> /dev/null; then
-        yay -S --noconfirm --needed \
+    # Install from AUR if AUR helper is available
+    if command -v "${AUR_HELPER:-yay}" &> /dev/null; then
+        ${AUR_HELPER:-yay} -S --noconfirm --needed \
             gotop \
             bashtop \
             s-tui \
@@ -601,7 +601,7 @@ if confirm "Install monitoring and system tools?"; then
             mission-center \
             resources
     else
-        warn "yay not available, skipping AUR monitoring tools"
+        warn "${AUR_HELPER:-yay} not available, skipping AUR monitoring tools"
     fi
     
     success "Monitoring and system tools installed"
@@ -637,9 +637,9 @@ if confirm "Install network development tools?"; then
         nginx \
         apache
     
-    # Install from AUR if yay is available
-    if command -v yay &> /dev/null; then
-        yay -S --noconfirm --needed \
+    # Install from AUR if AUR helper is available
+    if command -v "${AUR_HELPER:-yay}" &> /dev/null; then
+        ${AUR_HELPER:-yay} -S --noconfirm --needed \
             postman-bin \
             insomnia \
             hurl \
@@ -647,7 +647,7 @@ if confirm "Install network development tools?"; then
             proxyman \
             charles-proxy
     else
-        warn "yay not available, skipping AUR network tools"
+        warn "${AUR_HELPER:-yay} not available, skipping AUR network tools"
     fi
     
     success "Network tools installed"

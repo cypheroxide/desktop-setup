@@ -110,7 +110,7 @@ install_gtk_themes() {
         else
             if gum confirm "Install $package?"; then
                 print_status "Installing $package..."
-                if yay -S --needed --noconfirm "$package"; then
+                if ${AUR_HELPER:-yay} -S --needed --noconfirm "$package"; then
                     print_success "$package installed successfully"
                 else
                     print_warning "Failed to install $package, continuing..."
@@ -141,7 +141,7 @@ install_qt_themes() {
         else
             if gum confirm "Install $package?"; then
                 print_status "Installing $package..."
-                if yay -S --needed --noconfirm "$package"; then
+                if ${AUR_HELPER:-yay} -S --needed --noconfirm "$package"; then
                     print_success "$package installed successfully"
                 else
                     print_warning "Failed to install $package, continuing..."
@@ -158,7 +158,7 @@ configure_plymouth() {
     if ! command -v plymouth &> /dev/null; then
         if gum confirm "Plymouth not found. Install Plymouth boot splash?"; then
             print_status "Installing Plymouth..."
-            if yay -S --needed --noconfirm plymouth; then
+            if ${AUR_HELPER:-yay} -S --needed --noconfirm plymouth; then
                 print_success "Plymouth installed successfully"
             else
                 print_error "Failed to install Plymouth"
@@ -179,7 +179,7 @@ configure_plymouth() {
     for theme in "${plymouth_themes[@]}"; do
         if gum confirm "Install $theme?"; then
             print_status "Installing $theme..."
-            if yay -S --needed --noconfirm "$theme"; then
+            if ${AUR_HELPER:-yay} -S --needed --noconfirm "$theme"; then
                 print_success "$theme installed successfully"
             else
                 print_warning "Failed to install $theme, continuing..."
@@ -207,7 +207,7 @@ configure_swaylock() {
     if ! command -v swaylock &> /dev/null; then
         if gum confirm "Swaylock not found. Install Swaylock screen locker?"; then
             print_status "Installing Swaylock..."
-            if yay -S --needed --noconfirm swaylock-effects; then
+            if ${AUR_HELPER:-yay} -S --needed --noconfirm swaylock-effects; then
                 print_success "Swaylock installed successfully"
             else
                 print_error "Failed to install Swaylock"
@@ -284,7 +284,7 @@ configure_kde_themes() {
     for theme in "${kde_themes[@]}"; do
         if gum confirm "Install $theme?"; then
             print_status "Installing $theme..."
-            if yay -S --needed --noconfirm "$theme"; then
+            if ${AUR_HELPER:-yay} -S --needed --noconfirm "$theme"; then
                 print_success "$theme installed successfully"
             else
                 print_warning "Failed to install $theme, continuing..."

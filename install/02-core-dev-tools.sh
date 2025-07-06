@@ -335,10 +335,10 @@ else
 fi
 
 # Install additional development tools from AUR
-if command -v yay &> /dev/null && gum confirm "Install additional development tools from AUR?"; then
+if command -v "${AUR_HELPER:-yay}" &> /dev/null && gum confirm "Install additional development tools from AUR?"; then
     log "Installing additional development tools from AUR..."
     
-    yay -S --noconfirm --needed \
+    ${AUR_HELPER:-yay} -S --noconfirm --needed \
         visual-studio-code-bin \
         google-chrome \
         discord \

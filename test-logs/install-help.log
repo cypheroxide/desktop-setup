@@ -1,0 +1,16 @@
+[0;34m=== Desktop Setup Installation ===[0m
+[0;34m[2025-07-06 15:50:42][0m Project directory: /home/cypheroxide/.local/share/desktop-setup
+
+Usage: /home/cypheroxide/.local/share/desktop-setup/install.sh [OPTIONS]
+
+Options:
+  -a, --aur-helper HELPER    Choose AUR helper: yay, paru, trizen (default: yay)
+  -d, --dry-run              Show what would be installed without actually installing
+  -v, --verbose              Enable verbose output
+  -h, --help                 Show this help message
+
+Supported AUR helpers:
+  yay     - Default, feature-rich AUR helper
+  paru    - Rust-based AUR helper
+  trizen  - Lightweight AUR helper
+

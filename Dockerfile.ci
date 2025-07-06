@@ -1,0 +1,138 @@
+FROM archlinux:latest
+
+# Set environment variables for non-interactive installation
+ENV DEBIAN_FRONTEND=noninteractive
+ENV BOOTSTRAP_NON_INTERACTIVE=1
+ENV CI=true
+ENV TERM=xterm-256color
+
+# Update system and install base dependencies
+RUN pacman -Syu --noconfirm && \
+    pacman -S --needed --noconfirm \
+        base-devel \
+        git \
+        sudo \
+        curl \
+        wget \
+        python3 \
+        python-yaml \
+        shellcheck \
+        docker \
+        vim \
+        nano \
+        bash-completion \
+    && pacman -Scc --noconfirm
+
+# Create a non-root user for testing
+RUN useradd -m -G wheel,docker testuser && \
+    echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && \
+    echo 'testuser ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# Create directory structure
+RUN mkdir -p /home/testuser/desktop-setup && \
+    chown -R testuser:testuser /home/testuser
+
+# Copy project files
+COPY --chown=testuser:testuser . /home/testuser/desktop-setup/
+
+# Switch to test user
+USER testuser
+WORKDIR /home/testuser/desktop-setup
+
+# Make all scripts executable
+RUN find . -name "*.sh" -type f -exec chmod +x {} \;
+
+# Create test environment validation script
+RUN cat > /home/testuser/validate-environment.sh << 'EOF'
+#!/bin/bash
+set -e
+
+echo "=== Environment Validation ==="
+echo "User: $(whoami)"
+echo "Home: $HOME"
+echo "Working Directory: $(pwd)"
+echo "Shell: $SHELL"
+
+echo -e "\n=== System Information ==="
+uname -a
+cat /etc/os-release | head -5
+
+echo -e "\n=== Available Commands ==="
+which git || echo "git not found"
+which sudo || echo "sudo not found"
+which python3 || echo "python3 not found"
+which shellcheck || echo "shellcheck not found"
+
+echo -e "\n=== Project Structure ==="
+ls -la
+
+echo -e "\n=== Script Permissions ==="
+find . -name "*.sh" -type f ! -executable -exec echo "Not executable: {}" \; || echo "All scripts are executable"
+
+echo -e "\n=== ShellCheck Test ==="
+shellcheck --version
+
+echo -e "\n=== Environment validation complete ==="
+EOF
+
+RUN chmod +x /home/testuser/validate-environment.sh
+
+# Create test script for non-interactive installation
+RUN cat > /home/testuser/test-installation.sh << 'EOF'
+#!/bin/bash
+set -e
+
+echo "=== Testing Non-Interactive Installation ==="
+
+# Test bootstrap script
+if [ -f bootstrap.sh ]; then
+    echo "Testing bootstrap.sh..."
+    ./bootstrap.sh --help || echo "Bootstrap help test completed"
+else
+    echo "bootstrap.sh not found"
+    exit 1
+fi
+
+# Test main installation script
+if [ -f install.sh ]; then
+    echo "Testing install.sh dry run..."
+    ./install.sh --dry-run || echo "Install dry-run test completed"
+    
+    echo "Testing install.sh help..."
+    ./install.sh --help || echo "Install help test completed"
+else
+    echo "install.sh not found"
+    exit 1
+fi
+
+# Test individual install modules
+echo "Testing install modules..."
+for script in install/*.sh; do
+    if [ -f "$script" ]; then
+        echo "Syntax checking: $script"
+        bash -n "$script" || {
+            echo "Syntax error in $script"
+            exit 1
+        }
+    fi
+done
+
+# Test utility scripts
+echo "Testing utility scripts..."
+for script in bin/*.sh; do
+    if [ -f "$script" ]; then
+        echo "Syntax checking: $script"
+        bash -n "$script" || {
+            echo "Syntax error in $script"
+            exit 1
+        }
+    fi
+done
+
+echo "=== Non-Interactive Installation Tests Complete ==="
+EOF
+
+RUN chmod +x /home/testuser/test-installation.sh
+
+# Set default command
+CMD ["/home/testuser/validate-environment.sh"]
