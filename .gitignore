@@ -1,0 +1,47 @@
+# SSH Keys and sensitive files
+*.key
+*.pem
+id_*
+github
+github.pub
+*.priv
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Build artifacts
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Cache directories
+.cache/
+*.cache
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
