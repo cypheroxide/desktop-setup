@@ -2,8 +2,8 @@
 
 ## Status Badges
 
-[![CI/CD Pipeline](https://github.com/cypheroxide/desktop-setup/workflows/CI%2FCD%20Pipeline/badge.svg?branch=main)](https://github.com/cypheroxide/desktop-setup/actions/workflows/ci.yml)
-[![ShellCheck](https://github.com/cypheroxide/desktop-setup/workflows/CI%2FCD%20Pipeline/badge.svg?branch=main&event=push)](https://github.com/cypheroxide/desktop-setup/actions/workflows/ci.yml)
+[![CI/CD Pipeline](https://github.com/cypheroxide/desktop-setup/workflows/CI%2FCD%20Pipeline/badge.svg?branch=master)](https://github.com/cypheroxide/desktop-setup/actions/workflows/ci.yml)
+[![ShellCheck](https://github.com/cypheroxide/desktop-setup/workflows/CI%2FCD%20Pipeline/badge.svg?branch=master&event=push)](https://github.com/cypheroxide/desktop-setup/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Technology Stack
