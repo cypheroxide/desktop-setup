@@ -179,6 +179,83 @@ make_scripts_executable() {
     log_success "Scripts made executable"
 }
 
+# Function to setup Chaotic AUR repository
+setup_chaotic_aur() {
+    log "Setting up Chaotic AUR repository..."
+    
+    # Check if chaotic-aur is already configured
+    if grep -q "\[chaotic-aur\]" /etc/pacman.conf; then
+        log_warning "Chaotic AUR repository already exists in /etc/pacman.conf"
+        return 0
+    fi
+    
+    # Ask user for confirmation before setting up Chaotic AUR
+    if command -v gum > /dev/null 2>&1; then
+        gum confirm "Do you want to set up Chaotic AUR repository for faster AUR package installation?" || {
+            log "Skipping Chaotic AUR setup."
+            return 0
+        }
+    else
+        echo -n "Do you want to set up Chaotic AUR repository for faster AUR package installation? (y/N): "
+        read -r response
+        case "$response" in
+            [yY][eE][sS]|[yY])
+                log "Setting up Chaotic AUR..."
+                ;;
+            *)
+                log "Skipping Chaotic AUR setup."
+                return 0
+                ;;
+        esac
+    fi
+    
+    # Step 1: Import the primary key
+    log "Importing Chaotic AUR primary key..."
+    if ! sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com; then
+        log_error "Failed to import Chaotic AUR primary key"
+        return 1
+    fi
+    
+    # Step 2: Locally sign the key
+    log "Locally signing the imported key..."
+    if ! sudo pacman-key --lsign-key 3056513887B78AEB; then
+        log_error "Failed to locally sign the key"
+        return 1
+    fi
+    
+    log_success "Key setup completed successfully"
+    
+    # Step 3: Install chaotic-keyring and chaotic-mirrorlist
+    log "Installing chaotic-keyring and chaotic-mirrorlist packages..."
+    if ! sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst'; then
+        log_error "Failed to install chaotic-keyring"
+        return 1
+    fi
+    
+    if ! sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst'; then
+        log_error "Failed to install chaotic-mirrorlist"
+        return 1
+    fi
+    
+    log_success "Chaotic AUR packages installed successfully"
+    
+    # Step 4: Add repository to pacman.conf
+    log "Adding Chaotic AUR repository to /etc/pacman.conf..."
+    echo -e "\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist" | sudo tee -a /etc/pacman.conf > /dev/null
+    log_success "Chaotic AUR repository added to pacman.conf"
+    
+    # Step 5: Update system
+    log "Updating system and synchronizing with Chaotic AUR..."
+    if ! sudo pacman -Syu --noconfirm; then
+        log_error "Failed to update system with Chaotic AUR"
+        return 1
+    fi
+    
+    log_success "System update completed"
+    log_success "🎉 Chaotic AUR installation completed successfully!"
+    log "Popular packages from Chaotic AUR include: yay, paru, google-chrome, visual-studio-code-bin"
+}
+
 # Function to get user confirmation
 get_user_confirmation() {
     if command -v gum > /dev/null 2>&1; then
@@ -229,6 +306,9 @@ main() {
     
     # Get user confirmation
     get_user_confirmation
+    
+    # Setup Chaotic AUR repository
+    setup_chaotic_aur
     
     # Update repository if we're not already running from the target location
     if [[ "$SCRIPT_DIR" != "$REPO_PATH" ]]; then
