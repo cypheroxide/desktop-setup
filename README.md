@@ -455,6 +455,36 @@ The status badges at the top of this README automatically update based on the la
 - License compliance
 - Technology stack compatibility
 
+## Security
+
+### Security Policy
+
+This project involves system-level configurations and requires elevated privileges. Please review our comprehensive [Security Policy](SECURITY.md) before use.
+
+### Security Considerations
+
+- **Sudo Access**: Scripts require elevated privileges for system configuration
+- **Package Installation**: Automated installation from AUR and official repositories
+- **Network Configuration**: Tailscale VPN and container networking setup
+- **Container Deployment**: Docker services with network access
+
+### Best Practices
+
+1. **Review Before Execution**: Always review scripts before running
+2. **Test Environment**: Use a test system or VM for initial testing
+3. **Backup Configuration**: Backup your current system before installation
+4. **Monitor Execution**: Watch script execution for unexpected behavior
+
+### Reporting Security Issues
+
+If you discover a security vulnerability:
+
+- **GitHub Security Advisory**: [Create a private advisory](https://github.com/cypheroxide/desktop-setup/security/advisories/new) (recommended)
+- **Email**: security@hopeintsys.com with "SECURITY REPORT" in subject
+- **Response Time**: 24 hours for initial response
+
+See [SECURITY.md](SECURITY.md) for complete vulnerability reporting procedures.
+
 ## Support
 
 For issues specific to this setup:
