@@ -60,8 +60,8 @@ check_requirements() {
 # Function to clone or update repository
 update_repository() {
     # Set default branch if not specified
-    DESKTOP_REF=${DESKTOP_REF:-main}
-    REPO_URL=${REPO_URL:-https://github.com/your-username/desktop-setup.git}
+    DESKTOP_REF=${DESKTOP_REF:-master}
+    REPO_URL=${REPO_URL:-https://github.com/cypheroxide/desktop-setup.git}
     REPO_PATH="$HOME/.local/share/desktop-setup"
     
     echo "Setting up repository..."

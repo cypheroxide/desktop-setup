@@ -7,8 +7,8 @@
 set -euo pipefail
 
 # Global configuration
-DESKTOP_REF="${DESKTOP_REF:-main}"
-REPO_URL="${REPO_URL:-https://github.com/your-username/desktop-setup.git}"
+DESKTOP_REF="${DESKTOP_REF:-master}"
+REPO_URL="${REPO_URL:-https://github.com/cypheroxide/desktop-setup.git}"
 REPO_PATH="$HOME/.local/share/desktop-setup"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
