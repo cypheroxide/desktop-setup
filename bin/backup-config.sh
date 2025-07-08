@@ -2,34 +2,20 @@
 # backup-config.sh - Backup important configuration files
 # Usage: ./backup-config.sh [backup-directory]
 
-set -e
+# Source shared logging library
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/logging.sh"
+
+# Set up error handling
+setup_error_handling
 
 # Configuration
 BACKUP_DIR="${1:-$HOME/backups/config-$(date +%Y%m%d_%H%M%S)}"
 HOSTNAME=$(hostname)
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# Function to print colored output
-print_status() {
-    echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-print_warning() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
+# Override print_header to use BACKUP prefix
 print_header() {
-    echo -e "${BLUE}[BACKUP]${NC} $1"
+    echo -e "${BLUE}[$(date '+%Y-%m-%d %H:%M:%S')] BACKUP:${NC} $1"
 }
 
 # Create backup directory

@@ -21,6 +21,8 @@ Automated Arch Linux desktop environment setup with KDE Plasma, Tailscale VPN in
 - **Unified Bootstrap Process**: Single-command setup with interactive prompts
 - **AUR Helper Selection**: Choose between `yay`, `paru`, or `trizen`
 - **Modular Installation**: Organized installation scripts for different components
+- **Enhanced Logging**: Timestamped, color-coded logging with error handling
+- **Integration Testing**: Comprehensive AUR helper integration tests
 - **KDE Plasma Desktop**: Complete desktop environment with customizations
 - **Tailscale VPN Integration**: Automatic VPN setup with container binding
 - **Development Tools**: Comprehensive development environment setup
@@ -34,12 +36,15 @@ desktop-setup/
 ├── README.md                    # This documentation
 ├── bootstrap.sh                 # Bootstrap script with error handling
 ├── install.sh                   # Main installation orchestrator
+├── test-aur-integration.sh      # AUR helper integration tests
 ├── bin/                         # Custom utilities and helper scripts
 │   ├── backup-config.sh         # Configuration backup utility
 │   ├── docker-manager.sh        # Docker container management
 │   ├── network-monitor.sh       # Network monitoring tools
 │   ├── system-update.sh         # System update automation
 │   └── toggle-tailscale.sh      # Tailscale VPN toggle
+├── lib/                         # Shared library functions
+│   └── logging.sh               # Timestamped logging functions
 ├── config/                      # Configuration files and templates
 │   ├── README.md                # Configuration documentation
 │   ├── bashrc                   # Bash shell configuration
@@ -87,6 +92,7 @@ The bootstrap script will:
 - Install dependencies (git, gum)
 - Make scripts executable
 - Launch the main installation
+- Integrated logging with timestamped outputs via `logging.sh`
 
 ### 2. Manual Installation
 
@@ -199,6 +205,10 @@ Some configurations may require manual setup:
 - Application-specific settings
 
 Refer to [`config/README.md`](config/README.md) for detailed configuration instructions.
+
+## Removal Notice
+
+- The `installv2.sh` script has been deprecated and removed in favor of a more streamlined setup process.
 
 ## Troubleshooting
 
@@ -343,6 +353,67 @@ yay -Qs package-name
 2. **Review documentation**: Each module has specific documentation
 3. **Check system status**: Use provided utility scripts in `bin/`
 4. **Verify configuration**: Compare with templates in `config/`
+
+## Testing
+
+### AUR Helper Integration Testing
+
+The project includes comprehensive tests for AUR helper integration:
+
+```bash
+# Run AUR helper integration tests
+./test-aur-integration.sh
+```
+
+This test validates:
+- Command line argument parsing
+- AUR helper selection (yay, paru, trizen)
+- Dry run functionality
+- Function definitions
+- Gum integration
+
+### Logging System
+
+The project now includes a shared logging library (`lib/logging.sh`) that provides:
+
+- **Timestamped logging**: All output includes timestamps
+- **Color-coded messages**: Different message types use distinct colors
+- **Consistent formatting**: Uniform logging across all scripts
+- **Debug support**: Optional debug output with `DEBUG=true`
+- **Error handling**: Integrated error trapping and reporting
+
+#### Available Logging Functions
+
+```bash
+# Source the logging library
+source "lib/logging.sh"
+
+# Basic logging functions
+log "Information message"
+log_success "Success message"
+log_error "Error message"
+log_warning "Warning message"
+log_info "Info message"
+log_debug "Debug message" # Only shown with DEBUG=true
+
+# Legacy compatibility functions
+print_status "Status message"
+print_warning "Warning message"
+print_error "Error message"
+print_header "Header message"
+```
+
+#### Error Handling Setup
+
+```bash
+# Set up comprehensive error handling
+setup_error_handling
+
+# Log script lifecycle
+log_script_start "my-script.sh"
+# ... script logic ...
+log_script_end "my-script.sh"
+```
 
 ## Customization
 
