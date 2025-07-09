@@ -119,7 +119,13 @@ detect_os() {
     fi
     
     source /etc/os-release
-    log "Detected OS: $NAME $VERSION"
+    if [[ "$ID" == "arch" || "$ID" == "archlinux" ]]; then
+        OS="arch"
+        VERSION="$(pacman -Qi pacman | awk '/Version/ {print $3}')"
+        log "Detected Arch Linux: $VERSION"
+    else
+        log "Detected OS: $NAME $VERSION"
+    fi
 }
 
 # Function to clone or update repository
