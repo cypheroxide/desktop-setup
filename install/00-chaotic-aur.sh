@@ -112,9 +112,23 @@ if grep -q "^\[chaotic-aur\]" /etc/pacman.conf && pacman -Sl chaotic-aur &> /dev
 fi
 
 # Prompt user for confirmation
-if ! gum confirm "Set up Chaotic AUR repository? This will import signing keys and modify /etc/pacman.conf"; then
-    print_warning "Skipping Chaotic AUR setup"
-    exit 0
+if command -v gum > /dev/null 2>&1; then
+    if ! gum confirm "Set up Chaotic AUR repository? This will import signing keys and modify /etc/pacman.conf"; then
+        print_warning "Skipping Chaotic AUR setup"
+        exit 0
+    fi
+else
+    echo -n "Set up Chaotic AUR repository? This will import signing keys and modify /etc/pacman.conf (y/N): "
+    read -r response
+    case "$response" in
+        [yY][eE][sS]|[yY])
+            print_status "Setting up Chaotic AUR..."
+            ;;
+        *)
+            print_warning "Skipping Chaotic AUR setup"
+            exit 0
+            ;;
+    esac
 fi
 
 # Import signing keys
