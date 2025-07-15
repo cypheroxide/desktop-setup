@@ -1,3 +1,6 @@
+permissions:
+  contents: write
+  statuses: read
 name: Update Status Badges
 
 on:
